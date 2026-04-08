@@ -127,10 +127,6 @@ For more details, see [project_setup_guideline.md](file:///d:/Data/IT/Project/ju
 
 Contributions are welcome! Please feel free to submit a Pull Request.
 
-## 📄 License
-
-The MIT License (MIT). Please see [License File](https://opensource.org/licenses/MIT) for more information.
-
 ---
 
 <p align="center">
