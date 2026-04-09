@@ -25,6 +25,11 @@ A lightweight yet powerful accounting system built with **Laravel 12**, **Postgr
 ## 📸 Screenshots
 
 <p align="center">
+  <img src="screenshot/0.png" width="90%" alt="Login Page">
+  <br><i>Login Page - Secure authentication to access the system.</i>
+</p>
+
+<p align="center">
   <img src="screenshot/1.png" width="90%" alt="Dashboard Overview">
   <br><i>Dashboard Overview - Real-time financial monitoring.</i>
 </p>

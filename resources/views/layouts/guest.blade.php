@@ -52,10 +52,9 @@
     <body class="font-sans text-slate-900 antialiased bg-slate-50 dark:bg-slate-900">
         <div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0">
             <div class="text-center">
-                <a href="/" class="group">
-                    <div class="inline-flex items-center justify-center w-12 h-12 bg-primary-600 rounded-xl mb-4 shadow-lg shadow-primary-500/20 group-hover:scale-110 transition-transform duration-300">
-                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
-                    </div>
+                <a href="/" class="group flex flex-col items-center">
+                    <x-application-logo class="block h-16 w-auto fill-current text-slate-800 dark:text-white group-hover:scale-110 transition-transform duration-300 mb-4" />
+                    
                     <h1 class="text-xl font-black text-slate-800 dark:text-white tracking-tighter uppercase leading-none">
                         Sistem <span class="text-primary-600">Akuntansi</span>
                     </h1>

@@ -3,6 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\JournalEntry;
+use App\Models\Journal;
+use App\Models\Account;
+use App\Models\Bundle;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -22,6 +25,24 @@ class DashboardController extends Controller
                   ->whereYear('date', $currentYear);
             })->sum('amount');
 
-        return view('dashboard', compact('totalMonth'));
+        $totalJournalsThisMonth = Journal::whereMonth('date', $currentMonth)
+            ->whereYear('date', $currentYear)
+            ->count();
+
+        $activeBundles = Bundle::where('status', 'open')->count();
+        $totalAccounts = Account::count();
+
+        $recentJournals = Journal::with(['entries', 'bundle'])
+            ->latest('id')
+            ->take(5)
+            ->get();
+
+        return view('dashboard', compact(
+            'totalMonth', 
+            'totalJournalsThisMonth', 
+            'activeBundles', 
+            'totalAccounts',
+            'recentJournals'
+        ));
     }
 }
