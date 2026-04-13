@@ -189,6 +189,11 @@
                         </tbody>
                     </table>
                 </div>
+                @if($journals->hasPages())
+                    <div class="px-6 py-4 border-t border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/50">
+                        {{ $journals->links() }}
+                    </div>
+                @endif
             </div>
 
         </div>

@@ -7,7 +7,7 @@
                 <div class="shrink-0 flex items-center gap-3">
                     <a href="{{ route('dashboard') }}" class="flex items-center gap-3 group">
                         <x-application-logo
-                            class="block h-9 w-auto fill-current text-primary-600 dark:text-primary-400 group-hover:scale-110 transition-transform duration-300" />
+                            class="block h-9 w-auto fill-current text-slate-800 dark:text-white group-hover:scale-110 transition-transform duration-300" />
 
                     </a>
                 </div>

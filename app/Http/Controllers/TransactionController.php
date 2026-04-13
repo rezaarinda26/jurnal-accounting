@@ -29,7 +29,7 @@ class TransactionController extends Controller
                 $direction = 'desc';
             }
 
-            $journals = $bundle->journals()->with('entries.account')->orderBy($sort, $direction)->get();
+            $journals = $bundle->journals()->with('entries.account')->orderBy($sort, $direction)->paginate(15)->withQueryString();
             return view('transactions.index', compact('journals', 'sort', 'direction', 'bundle'));
         }
 
@@ -251,7 +251,7 @@ class TransactionController extends Controller
             $direction = 'desc';
         }
 
-        $journals = $query->orderBy($sort, $direction)->get();
+        $journals = $query->orderBy($sort, $direction)->paginate(25)->withQueryString();
         $accounts = Account::where('name', '!=', 'Kas')->orderBy('name')->get();
 
         return view('transactions.journal', compact('journals', 'accounts', 'sort', 'direction'));

@@ -1,4 +1,4 @@
-# 📊 Jurnal Accounting System
+# 📊 SISPENTRA (Sistem Pencatatan Transaksi Kas Terpadu)
 
 [![Laravel](https://img.shields.io/badge/Laravel-12.x-red.svg)](https://laravel.com)
 [![PHP](https://img.shields.io/badge/PHP-8.2+-blue.svg)](https://www.php.net)

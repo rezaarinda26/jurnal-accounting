@@ -21,4 +21,15 @@ class JournalEntry extends Model
     {
         return $this->belongsTo(Account::class);
     }
+
+    protected static function booted()
+    {
+        static::saved(function () {
+            \Illuminate\Support\Facades\Cache::forget('dashboard_stats');
+        });
+
+        static::deleted(function () {
+            \Illuminate\Support\Facades\Cache::forget('dashboard_stats');
+        });
+    }
 }

@@ -13,7 +13,7 @@ return [
     |
     */
 
-    'name' => env('APP_NAME', 'Sistem Akuntansi Operasional'),
+    'name' => env('APP_NAME', 'SISPENTRA'),
 
     /*
     |--------------------------------------------------------------------------

@@ -5,7 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <title>{{ config('app.name', 'Sistem Akuntansi Operasional') }}</title>
+        <title>{{ config('app.name', 'SISPENTRA') }}</title>
 
         <!-- Fonts -->
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -54,11 +54,10 @@
             <div class="text-center">
                 <a href="/" class="group flex flex-col items-center">
                     <x-application-logo class="block h-16 w-auto fill-current text-slate-800 dark:text-white group-hover:scale-110 transition-transform duration-300 mb-4" />
-                    
-                    <h1 class="text-xl font-black text-slate-800 dark:text-white tracking-tighter uppercase leading-none">
-                        Sistem <span class="text-primary-600">Akuntansi</span>
+                    <h1 class="text-2xl font-black text-slate-800 dark:text-white tracking-tighter uppercase leading-none">
+                        SIS<span class="text-primary-600">PENTRA</span>
                     </h1>
-                    <p class="text-[10px] font-bold text-slate-400 dark:text-slate-500 tracking-[0.3em] uppercase mt-1">Operasional</p>
+                    <p class="text-[10px] font-bold text-slate-400 dark:text-slate-500 tracking-[0.3em] uppercase mt-1">Sistem Pencatatan Transaksi Kas Terpadu</p>
                 </a>
             </div>
 
