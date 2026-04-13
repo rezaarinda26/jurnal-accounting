@@ -57,7 +57,7 @@
                     <h1 class="text-2xl font-black text-slate-800 dark:text-white tracking-tighter uppercase leading-none">
                         SIS<span class="text-primary-600">PENTRA</span>
                     </h1>
-                    <p class="text-[10px] font-bold text-slate-400 dark:text-slate-500 tracking-[0.3em] uppercase mt-1">Sistem Pencatatan Transaksi Kas Terpadu</p>
+                    <p class="text-[10px] font-bold text-slate-400 dark:text-slate-500 tracking-[0.1em] sm:tracking-[0.3em] uppercase mt-1 max-w-[280px] sm:max-w-none text-center">Sistem Pencatatan Transaksi Kas Terpadu</p>
                 </a>
             </div>
 
