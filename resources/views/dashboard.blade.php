@@ -77,7 +77,7 @@
 
             <!-- Secondary Stats Grid -->
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 px-4 sm:px-0">
-                <!-- Stat 1: Jurnal Bulan Ini -->
+                <!-- Stat 1: Transaksi Bulan Ini -->
                 <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-6 shadow-sm hover:shadow-md transition-shadow duration-300 flex items-center space-x-4 group cursor-pointer" onclick="window.location.href='{{ route('transactions.journal') }}'">
                     <div class="w-12 h-12 rounded-full bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-blue-600 dark:text-blue-400">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -85,7 +85,7 @@
                         </svg>
                     </div>
                     <div>
-                        <p class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider group-hover:text-blue-500 transition-colors">Jurnal Bulan Ini</p>
+                        <p class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider group-hover:text-blue-500 transition-colors">Transaksi Bulan Ini</p>
                         <h4 class="text-2xl font-bold text-slate-800 dark:text-white mt-1">{{ $totalJournalsThisMonth }}</h4>
                     </div>
                 </div>
