@@ -152,7 +152,8 @@
                             Tax / PPN Masukan</p>
                         <h4 class="text-xl font-bold text-slate-800 dark:text-white mt-1 truncate"
                             title="Rp {{ number_format($totalPpnMasukan, 0, ',', '.') }}">Rp
-                            {{ number_format($totalPpnMasukan, 0, ',', '.') }}</h4>
+                            {{ number_format($totalPpnMasukan, 0, ',', '.') }}
+                        </h4>
                     </div>
                 </div>
             </div>
@@ -241,7 +242,7 @@
                         class="px-6 py-5 border-b border-slate-200 dark:border-slate-700 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                         <div>
                             <h3 class="text-lg font-bold text-slate-800 dark:text-white">Transaksi Terakhir</h3>
-                            <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">5 jurnal yang terakhir kali
+                            <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">5 transaksi yang terakhir kali
                                 dicatat ke dalam sistem.</p>
                         </div>
                         <a href="{{ route('transactions.journal') }}"
@@ -255,7 +256,7 @@
                             <thead
                                 class="text-xs text-slate-500 dark:text-slate-400 uppercase bg-slate-50/70 dark:bg-slate-800/50">
                                 <tr>
-                                    <th class="px-6 py-4 font-semibold">No. Jurnal</th>
+                                    <th class="px-6 py-4 font-semibold">No. Referensi</th>
                                     <th class="px-6 py-4 font-semibold">Tanggal</th>
                                     <th class="px-6 py-4 font-semibold">PIC</th>
                                     <th class="px-6 py-4 font-semibold">Keterangan</th>
@@ -270,7 +271,8 @@
                                     <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors group">
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             <div class="font-medium text-slate-900 dark:text-white">
-                                                {{ $journal->journal_number }}</div>
+                                                {{ $journal->journal_number }}
+                                            </div>
                                             @if($journal->bundle)
                                                 <div class="mt-1">
                                                     <span
@@ -281,9 +283,11 @@
                                             @endif
                                         </td>
                                         <td class="px-6 py-4 text-slate-600 dark:text-slate-300 whitespace-nowrap">
-                                            {{ date('d M Y', strtotime($journal->date)) }}</td>
+                                            {{ date('d M Y', strtotime($journal->date)) }}
+                                        </td>
                                         <td class="px-6 py-4 text-slate-600 dark:text-slate-300 whitespace-nowrap">
-                                            {{ $journal->pic_name }}</td>
+                                            {{ $journal->pic_name }}
+                                        </td>
                                         <td class="px-6 py-4 text-slate-600 dark:text-slate-300 truncate max-w-[200px] xl:max-w-md"
                                             title="{{ $journal->description }}">{{ $journal->description }}</td>
                                         <td

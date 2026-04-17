@@ -23,8 +23,8 @@
                     <x-nav-link :href="route('transactions.journal')" :active="request()->routeIs('transactions.journal')">
                         {{ __('Jurnal') }}
                     </x-nav-link>
-                    <x-nav-link :href="route('accounts.index')" :active="request()->routeIs('accounts.*')">
-                        {{ __('Kode Akun') }}
+                    <x-nav-link :href="route('accounts.index')" :active="request()->routeIs(['accounts.*', 'pics.*'])">
+                        {{ __('Master Data') }}
                     </x-nav-link>
                     <x-nav-link :href="route('reports.trial_balance')"
                         :active="request()->routeIs('reports.trial_balance')">
@@ -98,8 +98,8 @@
             <x-responsive-nav-link :href="route('transactions.journal')" :active="request()->routeIs('transactions.journal')">
                 {{ __('Jurnal') }}
             </x-responsive-nav-link>
-            <x-responsive-nav-link :href="route('accounts.index')" :active="request()->routeIs('accounts.*')">
-                {{ __('Kode Akun') }}
+            <x-responsive-nav-link :href="route('accounts.index')" :active="request()->routeIs(['accounts.*', 'pics.*'])">
+                {{ __('Master Data') }}
             </x-responsive-nav-link>
             <x-responsive-nav-link :href="route('reports.trial_balance')"
                 :active="request()->routeIs('reports.trial_balance')">

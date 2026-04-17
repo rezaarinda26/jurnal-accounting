@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Journal;
 use App\Models\JournalEntry;
 use App\Models\Account;
+use App\Models\Pic;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -61,12 +62,13 @@ class TransactionController extends Controller
         }
 
         $accounts = Account::where('name', '!=', 'Kas')->orderBy('name')->get();
+        $pics = Pic::orderBy('name')->get();
         // Generate automatic journal number
         $lastJournal = Journal::latest('id')->first();
         $nextId = $lastJournal ? $lastJournal->id + 1 : 1;
         $newNumber = 'OUT-' . date('Ymd') . '-' . str_pad($nextId, 4, '0', STR_PAD_LEFT);
 
-        return view('transactions.create', compact('accounts', 'newNumber', 'openBundle'));
+        return view('transactions.create', compact('accounts', 'pics', 'newNumber', 'openBundle'));
     }
 
     public function store(Request $request)
@@ -141,7 +143,7 @@ class TransactionController extends Controller
         $query = Journal::with(['entries.account', 'bundle']);
 
         if ($request->filled('pic')) {
-            $query->where('pic_name', 'like', '%' . $request->pic . '%');
+            $query->where('pic_name', 'ilike', '%' . $request->pic . '%');
         }
 
         if ($request->filled('month')) {
@@ -189,18 +191,30 @@ class TransactionController extends Controller
             $bundleType = $journal->bundle ? ucfirst($journal->bundle->type) : 'Tanpa Bundle';
             $bundleNo = $journal->bundle ? $journal->bundle->bundle_number : '-';
 
+            // Temukan entri kas (kredit) untuk mendapatkan nomor akun kas
+            $kasEntry = $journal->entries->firstWhere('is_debit', false);
+            $kasCode = $kasEntry ? ($kasEntry->account->code ?? '-') : '-';
+
             foreach($journal->entries->filter(fn($e) => $e->is_debit) as $entry) {
+                // Khusus untuk entri PPN, ganti keterangan transaksi menjadi "PPN"
+                $isPpn = str_contains(strtolower($entry->account->name), 'ppn') || 
+                         str_contains(strtolower($entry->account->code), 'ppn');
+                
+                $description = $isPpn ? 'PPN' : ($journal->description ?? '-');
+
                 $writer->addRow([
                     'Tanggal' => \Carbon\Carbon::parse($journal->date)->format('d/m/Y'),
+                    'Akun Kas' => $kasCode,
+                    'Keterangan Transaksi' => $description,
+                    'Akun Lawan' => $entry->account->code ?? '-',
+                    'Keterangan Akun' => $entry->account->name,
+                    'Debit' => $entry->amount,
+                    'Kredit' => 0,
+                    'PIC' => $journal->pic_name,
+                    'Catatan' => $entry->description ?? '-',
                     'Tipe Bundle' => $bundleType,
                     'No Bundle' => $bundleNo,
-                    'Referensi' => $journal->journal_number,
-                    'PIC' => $journal->pic_name,
-                    'Keterangan Umum' => $journal->description ?? '-',
-                    'Kode Akun' => $entry->account->code ?? '-',
-                    'Nama Akun' => $entry->account->name,
-                    'Catatan Item' => $entry->description ?? '-',
-                    'Nominal (Rp)' => $entry->amount
+                    'Nomor Referensi' => $journal->journal_number,
                 ]);
             }
         }
@@ -253,8 +267,19 @@ class TransactionController extends Controller
 
         $journals = $query->orderBy($sort, $direction)->paginate(25)->withQueryString();
         $accounts = Account::where('name', '!=', 'Kas')->orderBy('name')->get();
+        $pics = Pic::orderBy('name')->get();
 
-        return view('transactions.journal', compact('journals', 'accounts', 'sort', 'direction'));
+        return view('transactions.journal', compact('journals', 'accounts', 'pics', 'sort', 'direction'));
+    }
+
+    public function printVoucher(Journal $transaction)
+    {
+        $transaction->load(['entries.account', 'bundle']);
+        
+        $journals = collect([$transaction]);
+        $bundle = $transaction->bundle;
+        
+        return view('transactions.print-batch', compact('journals', 'bundle'));
     }
 
     public function search(Request $request)

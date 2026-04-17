@@ -79,10 +79,53 @@
                         <div class="md:col-span-2">
                             <x-input-label for="pic_name" :value="__('Nama Penanggung Jawab (PIC)')"
                                 class="font-medium text-slate-600 dark:text-slate-300" />
-                            <input id="pic_name"
-                                class="block w-full mt-2 border-slate-300 dark:border-slate-600 focus:border-primary-500 focus:ring-primary-500 dark:bg-slate-900 rounded-lg shadow-sm py-2.5"
-                                type="text" name="pic_name" value="{{ old('pic_name') }}"
-                                placeholder="Contoh: Budi Santoso" required autofocus />
+                            
+                            <div class="relative mt-2" x-data="{ open: false, search: '' }" @click.away="open = false">
+                                <button type="button" @click="open = !open; if(open) $nextTick(() => $refs.picSearchInput.focus())"
+                                    class="flex items-center justify-between w-full border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 rounded-lg shadow-sm px-4 py-2.5 text-left transition-all focus:ring-4 focus:ring-slate-900/5">
+                                    <span x-text="selectedPic || '-- Pilih atau Cari Nama PIC --'" 
+                                          :class="!selectedPic ? 'text-slate-400 font-normal outline-none text-sm' : 'text-slate-700 dark:text-white font-semibold text-sm'"></span>
+                                    <svg :class="open ? 'rotate-180' : ''" class="w-4 h-4 text-slate-400 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                    </svg>
+                                </button>
+                                
+                                <input type="hidden" name="pic_name" x-model="selectedPic" required>
+
+                                <div x-show="open" 
+                                     x-transition:enter="transition ease-out duration-150"
+                                     x-transition:enter-start="opacity-0 translate-y-2 scale-95"
+                                     x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+                                     class="absolute z-50 mt-2 w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-2xl overflow-hidden min-w-[320px]">
+                                    <div class="p-3 border-b border-slate-100 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/50">
+                                        <div class="relative">
+                                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                                <svg class="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                                </svg>
+                                            </div>
+                                            <input x-ref="picSearchInput" x-model="search" @keydown.escape="open = false" 
+                                                   placeholder="Cari nama PIC..." 
+                                                   class="w-full pl-9 border-slate-200 dark:border-slate-700 dark:bg-slate-800 rounded-xl text-xs focus:ring-slate-900 focus:border-slate-900 py-2">
+                                        </div>
+                                    </div>
+                                    <ul class="max-h-60 overflow-y-auto py-1">
+                                        <template x-for="pic in filteredPics(search)" :key="pic.id">
+                                            <li @click="selectedPic = pic.name; open = false; search = ''"
+                                                class="px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-700/50 cursor-pointer flex items-center justify-between group transition-colors">
+                                                <span class="text-sm font-bold text-slate-700 dark:text-slate-200 group-hover:text-slate-950 dark:group-hover:text-white transition-colors" x-text="pic.name"></span>
+                                                <div x-show="selectedPic == pic.name" class="w-2 h-2 rounded-full bg-emerald-500 shadow-sm shadow-emerald-500/50"></div>
+                                            </li>
+                                        </template>
+                                        <div x-show="filteredPics(search).length === 0" class="px-4 py-12 text-center text-slate-400">
+                                            <svg class="mx-auto h-8 w-8 text-slate-200 dark:text-slate-700 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.172 9.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            </svg>
+                                            <p class="text-[11px] font-bold uppercase tracking-widest">PIC Tidak Ditemukan</p>
+                                        </div>
+                                    </ul>
+                                </div>
+                            </div>
                         </div>
                         <div class="md:col-span-2">
                             <x-input-label for="description" :value="__('Keterangan Transaksi')"
@@ -138,16 +181,56 @@
                                         class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Kode
                                         Akun <span x-show="entry.is_ppn"
                                             class="text-blue-500 font-bold ml-1">(Pajak)</span></label>
-                                    <select x-model="entry.account_id" x-bind:name="'entries['+index+'][account_id]'"
-                                        :class="entry.is_ppn ? 'bg-slate-100 dark:bg-slate-800 pointer-events-none opacity-80' : 'bg-white dark:bg-slate-900'"
-                                        class="block w-full border-slate-300 dark:border-slate-600 focus:border-primary-500 focus:ring-primary-500 rounded-lg shadow-sm text-sm py-2.5"
-                                        required>
-                                        <option value="">-- Pilih Akun --</option>
-                                        @foreach($accounts as $acc)
-                                            <option value="{{ $acc->id }}">{{ $acc->name }}</option>
-                                        @endforeach
-                                        <option value="18" x-show="entry.is_ppn">PPN Masukan</option>
-                                    </select>
+                                    <div class="relative" x-data="{ open: false, search: '' }" @click.away="open = false">
+                                        <button type="button" @click="if(!entry.is_ppn) { open = !open; if(open) $nextTick(() => $refs.searchInput.focus()) }"
+                                            :class="entry.is_ppn ? 'bg-slate-100 dark:bg-slate-800 cursor-not-allowed opacity-80' : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 hover:border-slate-400 dark:hover:border-slate-500 transition-all'"
+                                            class="flex items-center justify-between w-full border rounded-xl shadow-sm px-4 py-2.5 text-left transition-all focus:ring-4 focus:ring-slate-900/5">
+                                            <span x-text="getAccountName(entry.account_id) || '-- Pilih Akun --'" 
+                                                  :class="!entry.account_id ? 'text-slate-400 font-normal outline-none' : 'text-slate-700 dark:text-white font-semibold'"></span>
+                                            <svg :class="open ? 'rotate-180' : ''" class="w-4 h-4 text-slate-400 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                            </svg>
+                                        </button>
+                                        
+                                        <input type="hidden" x-bind:name="'entries['+index+'][account_id]'" x-model="entry.account_id" required>
+
+                                        <div x-show="open" 
+                                             x-transition:enter="transition ease-out duration-150"
+                                             x-transition:enter-start="opacity-0 translate-y-2 scale-95"
+                                             x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+                                             class="absolute z-[60] mt-2 w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-2xl overflow-hidden min-w-[320px]">
+                                            <div class="p-3 border-b border-slate-100 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/50">
+                                                <div class="relative">
+                                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                                        <svg class="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                                        </svg>
+                                                    </div>
+                                                    <input x-ref="searchInput" x-model="search" @keydown.escape="open = false" 
+                                                           placeholder="Cari kode atau nama akun..." 
+                                                           class="w-full pl-9 border-slate-200 dark:border-slate-700 dark:bg-slate-800 rounded-xl text-xs focus:ring-slate-900 focus:border-slate-900 py-2">
+                                                </div>
+                                            </div>
+                                            <ul class="max-h-72 overflow-y-auto py-1">
+                                                <template x-for="acc in filteredAccounts(search)" :key="acc.id">
+                                                    <li @click="entry.account_id = acc.id; open = false; search = ''; onAmountChange(entry)"
+                                                        class="px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-700/50 cursor-pointer flex items-center justify-between group/item transition-colors">
+                                                        <div class="flex flex-col">
+                                                            <span class="text-[10px] font-black text-slate-400 font-mono tracking-tighter mb-0.5 uppercase" x-text="acc.code"></span>
+                                                            <span class="text-sm font-bold text-slate-700 dark:text-slate-200 group-hover/item:text-slate-950 dark:group-hover/item:text-white transition-colors" x-text="acc.name"></span>
+                                                        </div>
+                                                        <div x-show="entry.account_id == acc.id" class="w-2 h-2 rounded-full bg-emerald-500 shadow-sm shadow-emerald-500/50"></div>
+                                                    </li>
+                                                </template>
+                                                <div x-show="filteredAccounts(search).length === 0" class="px-4 py-12 text-center text-slate-400">
+                                                    <svg class="mx-auto h-8 w-8 text-slate-200 dark:text-slate-700 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.172 9.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                    </svg>
+                                                    <p class="text-[11px] font-bold uppercase tracking-widest">Tidak Ada Hasil</p>
+                                                </div>
+                                            </ul>
+                                        </div>
+                                    </div>
                                 </div>
                                 <div class="w-full xl:w-2/5">
                                     <label
@@ -223,9 +306,33 @@
                         parent_id: null
                     }
                 ],
+                accounts: @json($accounts),
+                pics: @json($pics),
                 activeTab: '{{ $openBundle->type }}',
                 ppnAccountId: 18,
                 totalAmount: 0,
+                selectedPic: '{{ old('pic_name') }}',
+
+                getAccountName(id) {
+                    if (!id) return '';
+                    const acc = this.accounts.find(a => a.id == id);
+                    return acc ? `${acc.code} - ${acc.name}` : (id == 18 ? '1-115 - PPN Masukan' : 'Akun Tidak Dikenal');
+                },
+
+                filteredAccounts(search) {
+                    if (!search) return this.accounts;
+                    const s = search.toLowerCase();
+                    return this.accounts.filter(a => 
+                        a.name.toLowerCase().includes(s) || 
+                        a.code.toLowerCase().includes(s)
+                    );
+                },
+
+                filteredPics(search) {
+                    if (!search) return this.pics;
+                    const s = search.toLowerCase();
+                    return this.pics.filter(p => p.name.toLowerCase().includes(s));
+                },
 
                 init() {
                     if (this.activeTab === 'vendor') {

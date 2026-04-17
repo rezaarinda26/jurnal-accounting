@@ -89,4 +89,10 @@ class BundleController extends Controller
         return redirect()->route('bundles.index')
             ->with('success', 'Bundle ' . $bundle->bundle_number . ' berhasil dibuka kembali.');
     }
+
+    public function printVouchers(Bundle $bundle)
+    {
+        $journals = $bundle->journals()->with(['entries.account'])->get();
+        return view('transactions.print-batch', compact('bundle', 'journals'));
+    }
 }
