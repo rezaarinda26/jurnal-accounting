@@ -21,6 +21,7 @@ Route::middleware('auth')->group(function () {
     Route::resource('accounts', AccountController::class);
     Route::resource('pics', PicController::class);
     Route::get('reports/trial-balance', [ReportController::class, 'trialBalance'])->name('reports.trial_balance');
+    Route::get('reports/trial-balance/export', [ReportController::class, 'exportTrialBalance'])->name('reports.trial_balance.export');
     Route::get('transactions/search', [TransactionController::class, 'search'])->name('transactions.search');
     Route::get('transactions/export-excel', [TransactionController::class, 'exportExcel'])->name('transactions.export_excel');
     Route::get('transactions/journal', [TransactionController::class, 'journal'])->name('transactions.journal');
