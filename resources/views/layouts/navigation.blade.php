@@ -23,9 +23,11 @@
                     <x-nav-link :href="route('transactions.journal')" :active="request()->routeIs('transactions.journal')">
                         {{ __('Jurnal') }}
                     </x-nav-link>
+                    @if(auth()->user()->isAdmin())
                     <x-nav-link :href="route('accounts.index')" :active="request()->routeIs(['accounts.*', 'pics.*'])">
                         {{ __('Master Data') }}
                     </x-nav-link>
+                    @endif
                     <x-nav-link :href="route('reports.trial_balance')"
                         :active="request()->routeIs('reports.trial_balance')">
                         {{ __('Rekapitulasi Saldo') }}
@@ -98,9 +100,11 @@
             <x-responsive-nav-link :href="route('transactions.journal')" :active="request()->routeIs('transactions.journal')">
                 {{ __('Jurnal') }}
             </x-responsive-nav-link>
+            @if(auth()->user()->isAdmin())
             <x-responsive-nav-link :href="route('accounts.index')" :active="request()->routeIs(['accounts.*', 'pics.*'])">
                 {{ __('Master Data') }}
             </x-responsive-nav-link>
+            @endif
             <x-responsive-nav-link :href="route('reports.trial_balance')"
                 :active="request()->routeIs('reports.trial_balance')">
                 {{ __('Rekapitulasi Saldo') }}

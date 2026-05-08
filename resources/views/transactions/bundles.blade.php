@@ -105,7 +105,7 @@
                                 @endif
                             </div>
 
-                            @if($bundle->status === 'open')
+                            @if($bundle->status === 'open' && auth()->user()->isAdmin())
                                 <a href="{{ route('transactions.create', ['bundle_id' => $bundle->id]) }}"
                                     class="relative z-20 w-full py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg font-bold text-center text-xs transition-colors shadow-sm active:scale-95">
                                     Catat Transaksi Baru
@@ -115,6 +115,7 @@
 
                     </div>
                 @empty
+                    @if(auth()->user()->isAdmin())
                     <form action="{{ route('bundles.store') }}" method="POST" class="col-span-full">
                         @csrf
                         <input type="hidden" name="type" value="{{ $type }}">
@@ -137,6 +138,7 @@
                                 Klik area ini untuk langsung membuat bundle pertama Anda.</p>
                         </button>
                     </form>
+                    @endif
                 @endforelse
             </div>
 

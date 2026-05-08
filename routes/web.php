@@ -14,10 +14,10 @@ Route::get('/', function () {
 });
 
 Route::get('/dashboard', [DashboardController::class, 'index'])
-    ->middleware(['auth', 'verified'])
+    ->middleware(['auth', 'verified', 'admin'])
     ->name('dashboard');
 
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', 'admin'])->group(function () {
     Route::resource('accounts', AccountController::class);
     Route::resource('pics', PicController::class);
     Route::get('reports/trial-balance', [ReportController::class, 'trialBalance'])->name('reports.trial_balance');

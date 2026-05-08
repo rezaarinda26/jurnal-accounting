@@ -42,7 +42,7 @@
                         </select>
                     </form>
                     
-                    @if($bundle->status === 'open')
+                    @if($bundle->status === 'open' && auth()->user()->isAdmin())
                     <a href="{{ route('transactions.create', ['bundle_id' => $bundle->id]) }}"
                         class="inline-flex items-center px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-xl font-medium text-sm transition-all shadow-sm shadow-primary-500/20 active:scale-95 duration-200 h-[42px]">
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -138,6 +138,7 @@
                                                     </path>
                                                 </svg>
                                             </a>
+                                            @if(auth()->user()->isAdmin())
                                             <form action="{{ route('transactions.destroy', $journal->id) }}" method="POST"
                                                 onsubmit="return confirm('Hapus transaksi? Total laporan akan berubah signifikan.');">
                                                 @csrf
@@ -152,6 +153,7 @@
                                                     </svg>
                                                 </button>
                                             </form>
+                                            @endif
                                         </div>
                                     </td>
                                 </tr>

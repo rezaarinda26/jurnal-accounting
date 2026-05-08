@@ -331,6 +331,7 @@
                                                     </path>
                                                 </svg>
                                             </a>
+                                            @if(auth()->user()->isAdmin())
                                             <form action="{{ route('transactions.destroy', $journal->id) }}" method="POST"
                                                 onsubmit="return confirm('Hapus transaksi ini secara permanen?');">
                                                 @csrf
@@ -347,6 +348,7 @@
                                                     </svg>
                                                 </button>
                                             </form>
+                                            @endif
                                         </div>
                                     </td>
                                 </tr>

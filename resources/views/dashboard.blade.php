@@ -8,6 +8,7 @@
                     <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Ikhtisar harian sistem kas keluar Anda.
                     </p>
                 </div>
+                @if(auth()->user()->isAdmin())
                 <div class="flex gap-3">
                     <a href="{{ route('transactions.create') }}"
                         class="inline-flex items-center px-4 py-2.5 bg-primary-600 hover:bg-primary-700 text-white rounded-lg font-medium text-sm transition-all shadow-md shadow-primary-500/20 active:scale-95 duration-200">
@@ -18,6 +19,7 @@
                         Catat Transaksi
                     </a>
                 </div>
+                @endif
             </div>
 
             <!-- Statistic Cards -->
@@ -68,10 +70,12 @@
                         <p class="text-slate-300 text-sm leading-relaxed mb-6">Tambahkan kode akun agar pencatatan data
                             rapi & terstruktur.</p>
                     </div>
+                    @if(auth()->user()->isAdmin())
                     <a href="{{ route('accounts.index') }}"
                         class="relative z-10 inline-flex items-center text-sm font-semibold text-primary-300 hover:text-white transition-colors group-hover:translate-x-1 duration-300">
                         Kelola Kode Akun <span class="ml-1">&rarr;</span>
                     </a>
+                    @endif
                 </div>
             </div>
 
