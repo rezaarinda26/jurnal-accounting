@@ -188,7 +188,7 @@
                         class="md:w-1/2 p-6 border-b md:border-b-0 md:border-r border-slate-200 dark:border-slate-700 flex flex-col">
                         <div class="mb-4">
                             <h3 class="text-lg font-bold text-slate-800 dark:text-white">Pengeluaran per Kategori</h3>
-                            <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Distribusi pengeluaran bulan ini.
+                            <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Distribusi pengeluaran tahun ini.
                             </p>
                         </div>
                         <div class="flex-1 min-h-[250px] relative flex items-center justify-center">
@@ -220,7 +220,7 @@
                                         @php
                                             $colors = ['bg-blue-500', 'bg-amber-500', 'bg-emerald-500', 'bg-red-500', 'bg-violet-500'];
                                             $color = $colors[$index % count($colors)];
-                                            $percentage = $totalMonth > 0 ? ($expense['total'] / $totalMonth) * 100 : 0;
+                                            $percentage = $totalYear > 0 ? ($expense['total'] / $totalYear) * 100 : 0;
                                         @endphp
                                         <div class="{{ $color }} h-2 rounded-full" style="width: {{ $percentage }}%"></div>
                                     </div>

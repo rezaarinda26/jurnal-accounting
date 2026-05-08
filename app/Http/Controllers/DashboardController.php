@@ -30,6 +30,12 @@ class DashboardController extends Controller
                 ->whereYear('journals.date', $currentYear)
                 ->sum('journal_entries.amount');
 
+            // Total Pengeluaran Tahun Ini (For Category Chart)
+            $totalYear = JournalEntry::join('journals', 'journal_entries.journal_id', '=', 'journals.id')
+                ->where('journal_entries.is_debit', true)
+                ->whereYear('journals.date', $currentYear)
+                ->sum('journal_entries.amount');
+
             // 2. PPN Masukan (SQL Aggregation with filters)
             $totalPpnMasukan = JournalEntry::join('journals', 'journal_entries.journal_id', '=', 'journals.id')
                 ->join('accounts', 'journal_entries.account_id', '=', 'accounts.id')
@@ -44,11 +50,10 @@ class DashboardController extends Controller
                 })
                 ->sum('journal_entries.amount');
 
-            // 3. Pengeluaran per Kategori (SQL Group By & Aggregation)
+            // 3. Pengeluaran per Kategori (SQL Group By & Aggregation) - Yearly
             $expensesByCategory = JournalEntry::join('journals', 'journal_entries.journal_id', '=', 'journals.id')
                 ->join('accounts', 'journal_entries.account_id', '=', 'accounts.id')
                 ->where('journal_entries.is_debit', true)
-                ->whereMonth('journals.date', $currentMonth)
                 ->whereYear('journals.date', $currentYear)
                 ->select(
                     DB::raw("CONCAT(accounts.code, ' - ', accounts.name) as label"),
@@ -92,6 +97,7 @@ class DashboardController extends Controller
 
             return [
                 'totalMonth' => (float) $totalMonth,
+                'totalYear' => (float) $totalYear,
                 'totalJournalsThisMonth' => $totalJournalsThisMonth,
                 'activeBundles' => $activeBundles,
                 'totalAccounts' => $totalAccounts,
