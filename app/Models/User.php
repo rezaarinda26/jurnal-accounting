@@ -49,10 +49,26 @@ class User extends Authenticatable
     }
 
     /**
-     * Check if the user is an admin.
+     * Check if the user is an admin (Akunting).
      */
     public function isAdmin(): bool
     {
         return $this->role === 'admin';
+    }
+
+    /**
+     * Check if the user is a Finance staff.
+     */
+    public function isFinance(): bool
+    {
+        return $this->role === 'finance';
+    }
+
+    /**
+     * Check if the user is a viewer (read-only demo).
+     */
+    public function isViewer(): bool
+    {
+        return $this->role === 'viewer';
     }
 }

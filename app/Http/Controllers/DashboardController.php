@@ -16,27 +16,32 @@ class DashboardController extends Controller
     /**
      * Display the dashboard.
      */
-    public function index(): View
+    public function index(): View|\Illuminate\Http\RedirectResponse
     {
+        // Finance users are not allowed on the dashboard
+        if (auth()->check() && auth()->user()->isFinance()) {
+            return redirect()->route('payables.index');
+        }
+
         // Cache dashboard calculations for 10 minutes, cleared on data changes
         $stats = Cache::remember('dashboard_stats', 600, function() {
             $currentMonth = date('m');
             $currentYear = date('Y');
             
-            // 1. Total Pengeluaran Bulan Ini (SQL Aggregation)
+            // 1. Total Pengeluaran Bulan Ini
             $totalMonth = JournalEntry::join('journals', 'journal_entries.journal_id', '=', 'journals.id')
                 ->where('journal_entries.is_debit', true)
                 ->whereMonth('journals.date', $currentMonth)
                 ->whereYear('journals.date', $currentYear)
                 ->sum('journal_entries.amount');
 
-            // Total Pengeluaran Tahun Ini (For Category Chart)
+            // 2. Total Pengeluaran Tahun Ini (YTD)
             $totalYear = JournalEntry::join('journals', 'journal_entries.journal_id', '=', 'journals.id')
                 ->where('journal_entries.is_debit', true)
                 ->whereYear('journals.date', $currentYear)
                 ->sum('journal_entries.amount');
 
-            // 2. PPN Masukan (SQL Aggregation with filters)
+            // 3. PPN Masukan Bulan Ini
             $totalPpnMasukan = JournalEntry::join('journals', 'journal_entries.journal_id', '=', 'journals.id')
                 ->join('accounts', 'journal_entries.account_id', '=', 'accounts.id')
                 ->where('journal_entries.is_debit', true)
@@ -44,13 +49,35 @@ class DashboardController extends Controller
                 ->whereYear('journals.date', $currentYear)
                 ->where(function($q) {
                     $q->where('accounts.name', 'LIKE', '%PPN%')
-                      ->orWhere('accounts.name', 'LIKE', '%ppn%')
-                      ->orWhere('accounts.code', 'LIKE', '%PPN%')
-                      ->orWhere('accounts.code', 'LIKE', '%ppn%');
+                      ->orWhere('accounts.code', 'LIKE', '%PPN%');
                 })
                 ->sum('journal_entries.amount');
 
-            // 3. Pengeluaran per Kategori (SQL Group By & Aggregation) - Yearly
+            // 4. Hutang PPh 23 Outstanding (Kredit - Debit pada akun Hutang PPh 23)
+            $pphAccount = Account::where('name', 'LIKE', '%PPh%')
+                ->orWhere('code', 'LIKE', '%pph%')
+                ->first();
+
+            $hutangPph23 = 0;
+            if ($pphAccount) {
+                $totalKredit = JournalEntry::where('account_id', $pphAccount->id)
+                    ->where('is_debit', false)->sum('amount');
+                $totalDebit = JournalEntry::where('account_id', $pphAccount->id)
+                    ->where('is_debit', true)->sum('amount');
+                $hutangPph23 = max(0, $totalKredit - $totalDebit);
+            }
+
+            // 5. Top PIC Bulan Ini (by total spending)
+            $topPicThisMonth = Journal::join('journal_entries', 'journals.id', '=', 'journal_entries.journal_id')
+                ->where('journal_entries.is_debit', true)
+                ->whereMonth('journals.date', $currentMonth)
+                ->whereYear('journals.date', $currentYear)
+                ->select('journals.pic_name', DB::raw('SUM(journal_entries.amount) as total'))
+                ->groupBy('journals.pic_name')
+                ->orderByDesc('total')
+                ->first();
+
+            // 6. Pengeluaran per Kategori (Yearly)
             $expensesByCategory = JournalEntry::join('journals', 'journal_entries.journal_id', '=', 'journals.id')
                 ->join('accounts', 'journal_entries.account_id', '=', 'accounts.id')
                 ->where('journal_entries.is_debit', true)
@@ -64,14 +91,12 @@ class DashboardController extends Controller
                 ->orderByDesc('total')
                 ->get();
 
-            // 4. Static / Simple Counts
+            // 7. Jumlah Transaksi Bulan Ini
             $totalJournalsThisMonth = Journal::whereMonth('date', $currentMonth)
                 ->whereYear('date', $currentYear)
                 ->count();
-            $activeBundles = Bundle::where('status', 'open')->count();
-            $totalAccounts = Account::count();
 
-            // 5. Trend 5 Bulan Terakhir
+            // 8. Trend 5 Bulan Terakhir
             $startDate = now()->subMonths(4)->startOfMonth()->format('Y-m-d');
             $endDate = now()->endOfMonth()->format('Y-m-d');
 
@@ -96,14 +121,14 @@ class DashboardController extends Controller
             }
 
             return [
-                'totalMonth' => (float) $totalMonth,
-                'totalYear' => (float) $totalYear,
+                'totalMonth'           => (float) $totalMonth,
+                'totalYear'            => (float) $totalYear,
                 'totalJournalsThisMonth' => $totalJournalsThisMonth,
-                'activeBundles' => $activeBundles,
-                'totalAccounts' => $totalAccounts,
-                'expensesByCategory' => $expensesByCategory,
-                'totalPpnMasukan' => (float) $totalPpnMasukan,
-                'monthlyTrend' => $monthlyTrend
+                'totalPpnMasukan'      => (float) $totalPpnMasukan,
+                'hutangPph23'          => (float) $hutangPph23,
+                'topPicThisMonth'      => $topPicThisMonth,
+                'expensesByCategory'   => $expensesByCategory,
+                'monthlyTrend'         => $monthlyTrend,
             ];
         });
 

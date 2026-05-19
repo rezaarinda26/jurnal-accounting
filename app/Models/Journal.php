@@ -3,10 +3,23 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Pic;
 
 class Journal extends Model
 {
-    protected $fillable = ['journal_number', 'date', 'pic_name', 'description', 'bundle_id'];
+    protected $fillable = [
+        'journal_number',
+        'date',
+        'pic_id',
+        'pic_name',
+        'description',
+        'bundle_id',
+    ];
+
+    public function pic()
+    {
+        return $this->belongsTo(Pic::class);
+    }
 
     public function entries()
     {

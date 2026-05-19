@@ -9,16 +9,16 @@
                     </p>
                 </div>
                 @if(auth()->user()->isAdmin())
-                <div class="flex gap-3">
-                    <a href="{{ route('transactions.create') }}"
-                        class="inline-flex items-center px-4 py-2.5 bg-primary-600 hover:bg-primary-700 text-white rounded-lg font-medium text-sm transition-all shadow-md shadow-primary-500/20 active:scale-95 duration-200">
-                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4">
-                            </path>
-                        </svg>
-                        Catat Transaksi
-                    </a>
-                </div>
+                    <div class="flex gap-3">
+                        <a href="{{ route('transactions.create') }}"
+                            class="inline-flex items-center px-4 py-2.5 bg-primary-600 hover:bg-primary-700 text-white rounded-lg font-medium text-sm transition-all shadow-md shadow-primary-500/20 active:scale-95 duration-200">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4">
+                                </path>
+                            </svg>
+                            Catat Transaksi
+                        </a>
+                    </div>
                 @endif
             </div>
 
@@ -52,7 +52,7 @@
                     </div>
                 </div>
 
-                <!-- Secondary Metric / Shortlink -->
+                <!-- Secondary Metric: Top PIC Bulan Ini -->
                 <div
                     class="bg-gradient-to-br from-slate-800 to-slate-900 dark:from-slate-800 dark:to-black rounded-2xl p-8 text-white shadow-lg flex flex-col justify-between relative overflow-hidden group">
                     <div
@@ -63,19 +63,23 @@
                             class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center mb-5 backdrop-blur-sm">
                             <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M4 6h16M4 10h16M4 14h16M4 18h16"></path>
+                                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
                             </svg>
                         </div>
-                        <h3 class="text-xl font-bold mb-2">Master Kode Akun</h3>
-                        <p class="text-slate-300 text-sm leading-relaxed mb-6">Tambahkan kode akun agar pencatatan data
-                            rapi & terstruktur.</p>
+                        <p class="text-xs font-bold uppercase tracking-widest text-slate-400 mb-2">Top PIC Bulan Ini</p>
+                        @if($topPicThisMonth)
+                            <h3 class="text-xl font-bold mb-1 truncate">{{ $topPicThisMonth->pic_name }}</h3>
+                            <p class="text-slate-300 text-sm">Rp {{ number_format($topPicThisMonth->total, 0, ',', '.') }}
+                            </p>
+                        @else
+                            <h3 class="text-xl font-bold mb-1 text-slate-400">Belum ada data</h3>
+                            <p class="text-slate-500 text-sm">Tidak ada transaksi bulan ini.</p>
+                        @endif
                     </div>
-                    @if(auth()->user()->isAdmin())
-                    <a href="{{ route('accounts.index') }}"
-                        class="relative z-10 inline-flex items-center text-sm font-semibold text-primary-300 hover:text-white transition-colors group-hover:translate-x-1 duration-300">
-                        Kelola Kode Akun <span class="ml-1">&rarr;</span>
+                    <a href="{{ route('reports.trial_balance', ['view' => 'pic']) }}"
+                        class="relative z-10 inline-flex items-center text-sm font-semibold text-primary-300 hover:text-white transition-colors group-hover:translate-x-1 duration-300 mt-6">
+                        Lihat Rekap Per PIC <span class="ml-1">&rarr;</span>
                     </a>
-                    @endif
                 </div>
             </div>
 
@@ -101,45 +105,7 @@
                     </div>
                 </div>
 
-                <!-- Stat 2: Bundle Aktif -->
-                <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-6 shadow-sm hover:shadow-md transition-shadow duration-300 flex items-center space-x-4 group cursor-pointer"
-                    onclick="window.location.href='{{ route('bundles.index') }}'">
-                    <div
-                        class="w-12 h-12 rounded-full bg-amber-50 dark:bg-amber-900/20 flex items-center justify-center text-amber-600 dark:text-amber-400">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4">
-                            </path>
-                        </svg>
-                    </div>
-                    <div>
-                        <p
-                            class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider group-hover:text-amber-500 transition-colors">
-                            Bundle Aktif</p>
-                        <h4 class="text-2xl font-bold text-slate-800 dark:text-white mt-1">{{ $activeBundles }}</h4>
-                    </div>
-                </div>
-
-                <!-- Stat 3: Total Kode Akun -->
-                <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-6 shadow-sm hover:shadow-md transition-shadow duration-300 flex items-center space-x-4 group cursor-pointer"
-                    onclick="window.location.href='{{ route('accounts.index') }}'">
-                    <div
-                        class="w-12 h-12 rounded-full bg-emerald-50 dark:bg-emerald-900/20 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10">
-                            </path>
-                        </svg>
-                    </div>
-                    <div>
-                        <p
-                            class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider group-hover:text-emerald-500 transition-colors">
-                            Total Kode Akun</p>
-                        <h4 class="text-2xl font-bold text-slate-800 dark:text-white mt-1">{{ $totalAccounts }}</h4>
-                    </div>
-                </div>
-
-                <!-- Stat 4: Total PPN Masukan -->
+                <!-- Stat 2: PPN Masukan -->
                 <div
                     class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-6 shadow-sm hover:shadow-md transition-shadow duration-300 flex items-center space-x-4">
                     <div
@@ -153,10 +119,53 @@
                     <div class="flex-1 min-w-0">
                         <p
                             class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider truncate">
-                            Tax / PPN Masukan</p>
+                            PPN Masukan</p>
                         <h4 class="text-xl font-bold text-slate-800 dark:text-white mt-1 truncate"
                             title="Rp {{ number_format($totalPpnMasukan, 0, ',', '.') }}">Rp
                             {{ number_format($totalPpnMasukan, 0, ',', '.') }}
+                        </h4>
+                    </div>
+                </div>
+
+                <!-- Stat 3: Hutang PPh 23 Outstanding -->
+                <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-6 shadow-sm hover:shadow-md transition-shadow duration-300 flex items-center space-x-4 group">
+                    <div
+                        class="w-12 h-12 rounded-full {{ $hutangPph23 > 0 ? 'bg-amber-50 dark:bg-amber-900/20' : 'bg-slate-100 dark:bg-slate-700/50' }} flex items-center justify-center {{ $hutangPph23 > 0 ? 'text-amber-500 dark:text-amber-400' : 'text-slate-400' }}">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z">
+                            </path>
+                        </svg>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p
+                            class="text-xs font-semibold uppercase tracking-wider transition-colors {{ $hutangPph23 > 0 ? 'text-amber-500 group-hover:text-amber-600' : 'text-slate-400' }}">
+                            Hutang PPh 23</p>
+                        <h4 class="text-xl font-bold mt-1 truncate {{ $hutangPph23 > 0 ? 'text-amber-600 dark:text-amber-400' : 'text-slate-400 dark:text-slate-500' }}"
+                            title="Rp {{ number_format($hutangPph23, 0, ',', '.') }}">
+                            {{ $hutangPph23 > 0 ? 'Rp ' . number_format($hutangPph23, 0, ',', '.') : 'Lunas' }}
+                        </h4>
+                    </div>
+                </div>
+
+                <!-- Stat 4: Total Pengeluaran YTD -->
+                <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-6 shadow-sm hover:shadow-md transition-shadow duration-300 flex items-center space-x-4 group cursor-pointer"
+                    onclick="window.location.href='{{ route('reports.trial_balance') }}'">
+                    <div
+                        class="w-12 h-12 rounded-full bg-emerald-50 dark:bg-emerald-900/20 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z">
+                            </path>
+                        </svg>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p
+                            class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider group-hover:text-emerald-500 transition-colors">
+                            Pengeluaran {{ date('Y') }}</p>
+                        <h4 class="text-xl font-bold text-slate-800 dark:text-white mt-1 truncate"
+                            title="Rp {{ number_format($totalYear, 0, ',', '.') }}">
+                            Rp {{ number_format($totalYear, 0, ',', '.') }}
                         </h4>
                     </div>
                 </div>
@@ -273,18 +282,27 @@
                                         $journalAmount = $journal->entries->where('is_debit', true)->sum('amount');
                                     @endphp
                                     <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors group">
-                                        <td class="px-6 py-4 whitespace-nowrap">
-                                            <div class="font-medium text-slate-900 dark:text-white">
-                                                {{ $journal->journal_number }}
-                                            </div>
-                                            @if($journal->bundle)
-                                                <div class="mt-1">
-                                                    <span
-                                                        class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300">
+                                        <td class="px-6 py-4">
+                                            @php
+                                                $creditEntries = $journal->entries->where('is_debit', false);
+                                                $isKas = $creditEntries->contains(fn($e) => str_contains(strtolower($e->account->name), 'kas'));
+                                                $isHutang = $creditEntries->contains(fn($e) => str_contains(strtolower($e->account->name), 'hutang'));
+                                            @endphp
+                                            <div class="flex flex-wrap gap-1 mb-1">
+                                                @if($isKas)
+                                                    <span class="px-1.5 py-0.5 rounded text-[9px] font-black bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 border border-blue-200/50 uppercase tracking-tighter">KAS</span>
+                                                @elseif($isHutang)
+                                                    <span class="px-1.5 py-0.5 rounded text-[9px] font-black bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 border border-amber-200/50 uppercase tracking-tighter">HUTANG</span>
+                                                @endif
+
+                                                @if($journal->bundle)
+                                                    <span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400 border border-slate-200/50 uppercase tracking-tighter">
                                                         {{ $journal->bundle->bundle_number }}
                                                     </span>
-                                                </div>
-                                            @endif
+                                                @endif
+                                            </div>
+                                            <div class="font-bold text-slate-900 dark:text-white text-xs">{{ $journal->journal_number }}</div>
+                                            <div class="text-[10px] text-slate-500 mt-0.5 font-medium">{{ $journal->pic_name }}</div>
                                         </td>
                                         <td class="px-6 py-4 text-slate-600 dark:text-slate-300 whitespace-nowrap">
                                             {{ date('d M Y', strtotime($journal->date)) }}
@@ -294,9 +312,14 @@
                                         </td>
                                         <td class="px-6 py-4 text-slate-600 dark:text-slate-300 truncate max-w-[200px] xl:max-w-md"
                                             title="{{ $journal->description }}">{{ $journal->description }}</td>
-                                        <td
-                                            class="px-6 py-4 text-right font-medium text-slate-900 dark:text-white whitespace-nowrap">
-                                            Rp {{ number_format($journalAmount, 0, ',', '.') }}</td>
+                                        <td class="px-6 py-4 text-right">
+                                            @php
+                                                $totalDebit = $journal->entries->where('is_debit', true)->sum('amount');
+                                            @endphp
+                                            <span class="font-bold text-slate-900 dark:text-white whitespace-nowrap text-sm">
+                                                Rp {{ number_format($totalDebit, 0, ',', '.') }}
+                                            </span>
+                                        </td>
                                     </tr>
                                 @empty
                                     <tr>

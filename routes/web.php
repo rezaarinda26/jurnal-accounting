@@ -7,6 +7,7 @@ use App\Http\Controllers\PicController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\BundleController;
+use App\Http\Controllers\PayableController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -19,9 +20,12 @@ Route::get('/dashboard', [DashboardController::class, 'index'])
 
 Route::middleware(['auth', 'admin'])->group(function () {
     Route::resource('accounts', AccountController::class);
+    Route::post('pics/quick-store', [PicController::class, 'quickStore'])->name('pics.quick-store');
     Route::resource('pics', PicController::class);
     Route::get('reports/trial-balance', [ReportController::class, 'trialBalance'])->name('reports.trial_balance');
     Route::get('reports/trial-balance/export', [ReportController::class, 'exportTrialBalance'])->name('reports.trial_balance.export');
+    Route::get('reports/general-ledger', [ReportController::class, 'generalLedger'])->name('reports.general_ledger');
+    Route::get('reports/general-ledger/export', [ReportController::class, 'exportGeneralLedger'])->name('reports.general_ledger.export');
     Route::get('transactions/search', [TransactionController::class, 'search'])->name('transactions.search');
     Route::get('transactions/export-excel', [TransactionController::class, 'exportExcel'])->name('transactions.export_excel');
     Route::get('transactions/journal', [TransactionController::class, 'journal'])->name('transactions.journal');
@@ -33,6 +37,12 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::patch('bundles/{bundle}/close', [BundleController::class, 'close'])->name('bundles.close');
     Route::patch('bundles/{bundle}/reopen', [BundleController::class, 'reopen'])->name('bundles.reopen');
     Route::get('bundles/{bundle}/print-vouchers', [BundleController::class, 'printVouchers'])->name('bundles.print_vouchers');
+
+    Route::get('payables/{payable}/post', [PayableController::class, 'postShow'])->name('payables.post.show');
+    Route::post('payables/{payable}/post', [PayableController::class, 'processPost'])->name('payables.post.process');
+    Route::get('payables/{payable}/pay', [PayableController::class, 'payShow'])->name('payables.pay.show');
+    Route::post('payables/{payable}/pay', [PayableController::class, 'processPay'])->name('payables.pay.process');
+    Route::resource('payables', PayableController::class)->only(['index', 'create', 'store', 'destroy']);
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');

@@ -34,35 +34,15 @@
                     </div>
                     <div>
                         <h3 class="font-bold text-slate-800 dark:text-white">Daftar PIC Terdaftar</h3>
-                        <p class="text-xs text-slate-500">Total {{ $pics->total() }} PIC aktif</p>
+                        <p class="text-xs text-slate-500">Total {{ $pics->count() }} PIC aktif</p>
                     </div>
                 </div>
-
-                <form action="{{ route('pics.index') }}" method="GET"
-                    class="flex items-center gap-2 flex-1 md:max-w-md">
-                    <div class="relative w-full">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <svg class="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                            </svg>
-                        </div>
-                        <input type="text" name="search" value="{{ request('search') }}"
-                            placeholder="Cari nama atau deskripsi..."
-                            class="block w-full pl-9 pr-3 py-2 border border-slate-200 dark:border-slate-700 dark:bg-slate-900 rounded-xl text-sm focus:ring-primary-500 focus:border-primary-500">
-                    </div>
-                    <button type="submit"
-                        class="px-4 py-2 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl text-sm font-bold hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors">Cari</button>
-                    @if(request('search'))
-                        <a href="{{ route('pics.index') }}"
-                            class="px-4 py-2 text-slate-500 hover:text-slate-700 text-sm font-bold">Reset</a>
-                    @endif
-                </form>
 
                 <a href="{{ route('pics.create') }}"
                     class="inline-flex items-center px-4 py-2 bg-slate-900 hover:bg-black dark:bg-white dark:hover:bg-slate-100 text-white dark:text-slate-900 rounded-lg font-bold text-xs transition-all shadow-md active:scale-95 shrink-0">
                     <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4">
+                        </path>
                     </svg>
                     TAMBAH PIC
                 </a>
@@ -71,8 +51,10 @@
             @if(session('success'))
                 <div class="bg-primary-50 dark:bg-primary-900/30 border-l-4 border-primary-500 p-4 rounded-r-lg">
                     <div class="flex items-center">
-                        <svg class="w-5 h-5 text-primary-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        <svg class="w-5 h-5 text-primary-500 mr-3" fill="none" stroke="currentColor"
+                            viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M5 13l4 4L19 7"></path>
                         </svg>
                         <p class="text-sm text-primary-800 dark:text-primary-200 font-medium">{{ session('success') }}</p>
                     </div>
@@ -80,7 +62,8 @@
             @endif
 
             <div
-                class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
+                class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden"
+                x-data="{ picSearch: '' }">
                 <div class="overflow-x-auto">
                     <table class="w-full text-sm text-left">
                         <thead
@@ -91,9 +74,26 @@
                                 <th class="px-6 py-4 font-semibold tracking-wider text-center">Aksi</th>
                             </tr>
                         </thead>
+                        <tbody class="bg-slate-50/50 dark:bg-slate-900/20 border-b border-slate-100 dark:border-slate-700">
+                            <tr>
+                                <td colspan="3" class="px-6 py-3">
+                                    <div class="relative max-w-xs">
+                                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                            <svg class="h-4 w-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                                            </svg>
+                                        </div>
+                                        <input type="text" x-model="picSearch"
+                                            placeholder="Cari nama atau deskripsi PIC..."
+                                            class="block w-full pl-9 pr-3 py-2 border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-xs focus:ring-primary-500 focus:border-primary-500 placeholder-slate-400 dark:text-white transition-all">
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
                         <tbody class="divide-y divide-slate-100 dark:divide-slate-700/50">
                             @forelse($pics as $pic)
-                                <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-700/20 transition-colors">
+                                <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-700/20 transition-colors"
+                                    x-show="'{{ strtolower($pic->name) }} {{ strtolower($pic->description ?? '') }}'.includes(picSearch.toLowerCase())">
                                     <td class="px-6 py-4 font-medium text-slate-900 dark:text-white">
                                         {{ $pic->name }}
                                     </td>
@@ -132,13 +132,6 @@
                     </table>
                 </div>
             </div>
-
-            @if($pics->hasPages())
-                <div
-                    class="px-6 py-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-sm">
-                    {{ $pics->links() }}
-                </div>
-            @endif
 
         </div>
     </div>

@@ -9,17 +9,7 @@ class PicController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Pic::query();
-        
-        if ($request->filled('search')) {
-            $search = $request->search;
-            $query->where(function($q) use ($search) {
-                $q->where('name', 'ilike', '%' . $search . '%')
-                  ->orWhere('description', 'ilike', '%' . $search . '%');
-            });
-        }
-
-        $pics = $query->orderBy('name')->paginate(25)->withQueryString();
+        $pics = Pic::orderBy('name')->get();
         return view('pics.index', compact('pics'));
     }
 
@@ -62,5 +52,22 @@ class PicController extends Controller
         $pic->delete();
 
         return redirect()->route('pics.index')->with('success', 'PIC berhasil dihapus.');
+    }
+
+    public function quickStore(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+        ]);
+
+        $pic = Pic::create([
+            'name' => strtoupper($request->name),
+            'description' => 'Ditambahkan otomatis oleh Finance',
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'data' => $pic
+        ]);
     }
 }

@@ -84,7 +84,7 @@ class TransactionController extends Controller
             'bundle_id' => 'required|exists:bundles,id',
             'journal_number' => 'required|unique:journals,journal_number',
             'date' => 'required|date',
-            'pic_name' => 'required|string|max:255',
+            'pic_id' => 'required|exists:pics,id',
             'description' => 'nullable|string',
             'entries'           => 'required|array|min:1',
             'entries.*.account_id' => 'required|exists:accounts,id',
@@ -93,10 +93,13 @@ class TransactionController extends Controller
         ]);
 
         DB::transaction(function () use ($request, $openBundle) {
+            $pic = Pic::find($request->pic_id);
+            
             $journal = Journal::create([
                 'journal_number' => $request->journal_number,
                 'date' => $request->date,
-                'pic_name' => $request->pic_name,
+                'pic_id' => $pic->id,
+                'pic_name' => $pic->name,
                 'description' => $request->description,
                 'bundle_id' => $openBundle->id,
             ]);
@@ -104,14 +107,20 @@ class TransactionController extends Controller
             $totalAmount = 0;
 
             foreach ($request->entries as $entry) {
+                $isDebit = filter_var($entry['is_debit'] ?? true, FILTER_VALIDATE_BOOLEAN);
                 JournalEntry::create([
                     'journal_id' => $journal->id,
                     'account_id' => $entry['account_id'],
                     'description' => $entry['description'] ?? null,
                     'amount' => $entry['amount'],
-                    'is_debit' => true,
+                    'is_debit' => $isDebit,
                 ]);
-                $totalAmount += $entry['amount'];
+
+                if ($isDebit) {
+                    $totalAmount += $entry['amount'];
+                } else {
+                    $totalAmount -= $entry['amount'];
+                }
             }
 
             // Reverse entry for Kas (Credit)
@@ -123,7 +132,7 @@ class TransactionController extends Controller
             JournalEntry::create([
                 'journal_id' => $journal->id,
                 'account_id' => $kasAccount->id,
-                'description' => 'Pembayaran Kas (Otomatis) - ' . $request->pic_name,
+                'description' => 'Pembayaran Kas (Otomatis) - ' . $pic->name,
                 'amount' => $totalAmount,
                 'is_debit' => false,
             ]);
@@ -191,16 +200,19 @@ class TransactionController extends Controller
             $bundleType = $journal->bundle ? ucfirst($journal->bundle->type) : 'Tanpa Bundle';
             $bundleNo = $journal->bundle ? $journal->bundle->bundle_number : '-';
 
-            // Temukan entri kas (kredit) untuk mendapatkan nomor akun kas
-            $kasEntry = $journal->entries->firstWhere('is_debit', false);
+            // Temukan entri kas yang sesungguhnya (akun bernama 'Kas'), bukan sekadar entri kredit pertama
+            $kasEntry = $journal->entries->first(fn($e) => strtolower($e->account->name ?? '') === 'kas');
             $kasCode = $kasEntry ? ($kasEntry->account->code ?? '-') : '-';
 
-            foreach($journal->entries->filter(fn($e) => $e->is_debit) as $entry) {
+            foreach($journal->entries->reject(fn($e) => $e->account->name === 'Kas') as $entry) {
                 // Khusus untuk entri PPN, ganti keterangan transaksi menjadi "PPN"
                 $isPpn = str_contains(strtolower($entry->account->name), 'ppn') || 
                          str_contains(strtolower($entry->account->code), 'ppn');
                 
-                $description = $isPpn ? 'PPN' : ($journal->description ?? '-');
+                $isPph = str_contains(strtolower($entry->account->name), 'pph') || 
+                         str_contains(strtolower($entry->account->code), 'pph');
+
+                $description = $isPpn ? 'PPN' : ($isPph ? 'PPh 23' : ($journal->description ?? '-'));
 
                 $writer->addRow([
                     'Tanggal' => \Carbon\Carbon::parse($journal->date)->format('d/m/Y'),
@@ -208,8 +220,8 @@ class TransactionController extends Controller
                     'Keterangan Transaksi' => $description,
                     'Akun Lawan' => $entry->account->code ?? '-',
                     'Keterangan Akun' => $entry->account->name,
-                    'Debit' => $entry->amount,
-                    'Kredit' => 0,
+                    'Debit' => $entry->is_debit ? $entry->amount : 0,
+                    'Kredit' => !$entry->is_debit ? $entry->amount : 0,
                     'PIC' => $journal->pic_name,
                     'Catatan' => $entry->description ?? '-',
                     'Tipe Bundle' => $bundleType,
@@ -230,13 +242,10 @@ class TransactionController extends Controller
             $query->where('pic_name', 'like', '%' . $request->pic . '%');
         }
 
-        if ($request->filled('month')) { // format: YYYY-MM
-            $parts = explode('-', $request->month);
-            if (count($parts) === 2) {
-                $query->whereYear('date', $parts[0])
-                      ->whereMonth('date', $parts[1]);
-            }
-        }
+        $startDate = $request->input('start_date', now()->startOfMonth()->format('Y-m-d'));
+        $endDate = $request->input('end_date', now()->endOfMonth()->format('Y-m-d'));
+        
+        $query->whereBetween('date', [$startDate, $endDate]);
 
         if ($request->filled('nominal')) {
             $nominal = $request->nominal;
@@ -269,7 +278,7 @@ class TransactionController extends Controller
         $accounts = Account::where('name', '!=', 'Kas')->orderBy('name')->get();
         $pics = Pic::orderBy('name')->get();
 
-        return view('transactions.journal', compact('journals', 'accounts', 'pics', 'sort', 'direction'));
+        return view('transactions.journal', compact('journals', 'accounts', 'pics', 'sort', 'direction', 'startDate', 'endDate'));
     }
 
     public function printVoucher(Journal $transaction)

@@ -4,7 +4,19 @@
 
             <div class="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <a href="{{ url()->previous() === route('transactions.journal') ? route('transactions.journal') : route('transactions.index', ['bundle_id' => $journal->bundle_id]) }}"
+                    @php
+                        $prevUrl = url()->previous();
+                        $backUrl = route('transactions.index', ['bundle_id' => $journal->bundle_id]);
+                        
+                        if (str_contains($prevUrl, route('transactions.journal'))) {
+                            $backUrl = route('transactions.journal');
+                        } elseif (str_contains($prevUrl, route('reports.general_ledger'))) {
+                            $backUrl = $prevUrl;
+                        } elseif (str_contains($prevUrl, route('reports.trial_balance'))) {
+                            $backUrl = $prevUrl;
+                        }
+                    @endphp
+                    <a href="{{ $backUrl }}"
                         class="text-sm font-medium text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white transition-colors flex items-center mb-3">
                         <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -100,17 +112,22 @@
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-slate-100 dark:divide-slate-700/50">
-                                @forelse($journal->entries->filter(fn($e) => $e->is_debit) as $entry)
+                                @forelse($journal->entries->reject(fn($e) => $e->account->name === 'Kas') as $entry)
                                     <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-700/20 transition-colors">
                                         <td class="px-6 py-4">
                                             <div class="font-medium text-slate-900 dark:text-white">
-                                                {{ $entry->account->name }}</div>
+                                                {{ $entry->account->name }}
+                                                @if(!$entry->is_debit)
+                                                    <span class="ml-2 text-[10px] font-bold text-amber-600 bg-amber-100 dark:bg-amber-900/40 px-1.5 py-0.5 rounded uppercase">Potongan</span>
+                                                @endif
+                                            </div>
                                             <div class="text-xs text-slate-500">{{ $entry->account->code ?? '' }}</div>
                                         </td>
                                         <td class="px-6 py-4 text-slate-600 dark:text-slate-300">
                                             {{ $entry->description ?? '—' }}
                                         </td>
-                                        <td class="px-6 py-4 text-right font-semibold text-slate-800 dark:text-slate-200">
+                                        <td class="px-6 py-4 text-right font-semibold {{ $entry->is_debit ? 'text-slate-800 dark:text-slate-200' : 'text-amber-600 dark:text-amber-400' }}">
+                                            @if(!$entry->is_debit) - @endif
                                             {{ number_format($entry->amount, 0, ',', '.') }}
                                         </td>
                                     </tr>
@@ -125,11 +142,15 @@
                                 <tr class="border-t border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">
                                     <td colspan="2"
                                         class="px-6 py-5 text-right font-bold text-slate-800 dark:text-slate-300 uppercase text-xs tracking-wider">
-                                        Total Kredit Kas:
+                                        Total Pembayaran Kas:
                                     </td>
                                     <td class="px-6 py-5 text-right">
+                                        @php
+                                            $kasEntry = $journal->entries->firstWhere('account.name', 'Kas');
+                                            $totalNet = $kasEntry ? $kasEntry->amount : $journal->entries->filter(fn($e) => $e->is_debit)->sum('amount') - $journal->entries->filter(fn($e) => !$e->is_debit && $e->account->name !== 'Kas')->sum('amount');
+                                        @endphp
                                         <span class="text-xl font-black text-rose-600 dark:text-rose-500">Rp
-                                            {{ number_format($journal->entries->filter(fn($e) => $e->is_debit)->sum('amount'), 0, ',', '.') }}</span>
+                                            {{ number_format($totalNet, 0, ',', '.') }}</span>
                                     </td>
                                 </tr>
                             </tfoot>

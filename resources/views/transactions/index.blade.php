@@ -25,8 +25,7 @@
                             title="Urutkan Data">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z">
-                                </path>
+                                    d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"></path>
                             </svg>
                         </div>
                         <select name="sort" onchange="this.form.submit()"
@@ -123,7 +122,11 @@
                                             title="{{ $journal->description }}">{{ $journal->description ?? '—' }}</span>
                                     </td>
                                     <td class="px-6 py-4 font-bold text-slate-800 dark:text-slate-100 text-right">
-                                        {{ number_format($journal->entries->where('is_debit', true)->sum('amount'), 0, ',', '.') }}
+                                        @php
+                                            $kasEntry = $journal->entries->firstWhere('account.name', 'Kas');
+                                            $totalNet = $kasEntry ? $kasEntry->amount : $journal->entries->filter(fn($e) => $e->is_debit)->sum('amount') - $journal->entries->filter(fn($e) => !$e->is_debit && $e->account->name !== 'Kas')->sum('amount');
+                                        @endphp
+                                        {{ number_format($totalNet, 0, ',', '.') }}
                                     </td>
                                     <td class="px-6 py-4">
                                         <div class="flex items-center justify-center space-x-3 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity">

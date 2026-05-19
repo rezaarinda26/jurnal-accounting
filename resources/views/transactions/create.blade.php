@@ -77,20 +77,22 @@
                                 type="date" name="date" value="{{ old('date', date('Y-m-d')) }}" required />
                         </div>
                         <div class="md:col-span-2">
-                            <x-input-label for="pic_name" :value="__('Nama Penanggung Jawab (PIC)')"
-                                class="font-medium text-slate-600 dark:text-slate-300" />
+                            <div class="flex justify-between items-center mb-1.5">
+                                <x-input-label for="pic_id" :value="__('Nama Penanggung Jawab (PIC)')"
+                                    class="font-medium text-slate-600 dark:text-slate-300" />
+                            </div>
                             
                             <div class="relative mt-2" x-data="{ open: false, search: '' }" @click.away="open = false">
                                 <button type="button" @click="open = !open; if(open) $nextTick(() => $refs.picSearchInput.focus())"
                                     class="flex items-center justify-between w-full border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 rounded-lg shadow-sm px-4 py-2.5 text-left transition-all focus:ring-4 focus:ring-slate-900/5">
-                                    <span x-text="selectedPic || '-- Pilih atau Cari Nama PIC --'" 
-                                          :class="!selectedPic ? 'text-slate-400 font-normal outline-none text-sm' : 'text-slate-700 dark:text-white font-semibold text-sm'"></span>
+                                    <span x-text="selectedPicName || '-- Pilih atau Cari Nama PIC --'" 
+                                          :class="!selectedPicId ? 'text-slate-400 font-normal outline-none text-sm' : 'text-slate-700 dark:text-white font-semibold text-sm'"></span>
                                     <svg :class="open ? 'rotate-180' : ''" class="w-4 h-4 text-slate-400 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                                     </svg>
                                 </button>
                                 
-                                <input type="hidden" name="pic_name" x-model="selectedPic" required>
+                                <input type="hidden" name="pic_id" x-model="selectedPicId" required>
 
                                 <div x-show="open" 
                                      x-transition:enter="transition ease-out duration-150"
@@ -111,10 +113,10 @@
                                     </div>
                                     <ul class="max-h-60 overflow-y-auto py-1">
                                         <template x-for="pic in filteredPics(search)" :key="pic.id">
-                                            <li @click="selectedPic = pic.name; open = false; search = ''"
+                                            <li @click="selectedPicId = pic.id; selectedPicName = pic.name; open = false; search = ''"
                                                 class="px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-700/50 cursor-pointer flex items-center justify-between group transition-colors">
                                                 <span class="text-sm font-bold text-slate-700 dark:text-slate-200 group-hover:text-slate-950 dark:group-hover:text-white transition-colors" x-text="pic.name"></span>
-                                                <div x-show="selectedPic == pic.name" class="w-2 h-2 rounded-full bg-emerald-500 shadow-sm shadow-emerald-500/50"></div>
+                                                <div x-show="selectedPicId == pic.id" class="w-2 h-2 rounded-full bg-emerald-500 shadow-sm shadow-emerald-500/50"></div>
                                             </li>
                                         </template>
                                         <div x-show="filteredPics(search).length === 0" class="px-4 py-12 text-center text-slate-400">
@@ -131,9 +133,9 @@
                             <x-input-label for="description" :value="__('Keterangan Transaksi')"
                                 class="font-medium text-slate-600 dark:text-slate-300" />
                             <input id="description"
-                                class="block w-full mt-2 border-slate-300 dark:border-slate-600/50 bg-slate-50 dark:bg-slate-900/50 rounded-lg shadow-sm text-slate-500 py-2.5 cursor-not-allowed"
+                                class="block w-full mt-2 border-slate-300 dark:border-slate-600/50 bg-white dark:bg-slate-900 rounded-lg shadow-sm text-slate-800 dark:text-white py-2.5 focus:border-primary-500 focus:ring focus:ring-primary-500/20 transition-all"
                                 type="text" name="description" value="{{ old('description', 'Beban Operasional') }}"
-                                readonly />
+                                placeholder="Contoh: Beban Operasional, Setoran PPh 23, dsb." />
                         </div>
                     </div>
                 </div>
@@ -148,17 +150,31 @@
                         </h3>
                         <div class="flex items-center gap-4">
                             @if($openBundle->type === 'vendor')
-                                <label class="relative inline-flex items-center cursor-pointer group">
-                                    <input type="checkbox" :checked="activeTab === 'vendor'"
-                                        @change="setTab($event.target.checked ? 'vendor' : 'operasional')"
-                                        class="sr-only peer">
-                                    <div
-                                        class="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 dark:peer-focus:ring-primary-800 rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-slate-600 peer-checked:bg-primary-600">
-                                    </div>
-                                    <span
-                                        class="ms-3 text-sm font-bold text-slate-600 dark:text-slate-400 group-hover:text-primary-600 transition-colors">Automasi
-                                        PPN</span>
-                                </label>
+                                <div class="flex items-center gap-6">
+                                    <label class="relative inline-flex items-center cursor-pointer group">
+                                        <input type="checkbox" :checked="isPpnActive"
+                                            @change="togglePpn($event.target.checked)"
+                                            class="sr-only peer">
+                                        <div
+                                            class="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 dark:peer-focus:ring-primary-800 rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-slate-600 peer-checked:bg-primary-600">
+                                        </div>
+                                        <span
+                                            class="ms-3 text-sm font-bold text-slate-600 dark:text-slate-400 group-hover:text-primary-600 transition-colors">Automasi
+                                            PPN</span>
+                                    </label>
+
+                                    <label class="relative inline-flex items-center cursor-pointer group">
+                                        <input type="checkbox" :checked="isPphActive"
+                                            @change="togglePph($event.target.checked)"
+                                            class="sr-only peer">
+                                        <div
+                                            class="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-amber-300 dark:peer-focus:ring-amber-800 rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-slate-600 peer-checked:bg-amber-600">
+                                        </div>
+                                        <span
+                                            class="ms-3 text-sm font-bold text-slate-600 dark:text-slate-400 group-hover:text-amber-600 transition-colors">Automasi
+                                            PPh 23</span>
+                                    </label>
+                                </div>
                             @endif
 
                             <button type="button" @click="addEntry()"
@@ -174,16 +190,25 @@
 
                     <div class="space-y-4">
                         <template x-for="(entry, index) in entries" :key="entry.id">
-                            <div :class="entry.is_ppn ? 'bg-blue-50/50 dark:bg-blue-900/10 border-blue-200 dark:border-blue-800/50 ml-8 border-dashed' : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:shadow shadow-sm transition-shadow'"
+                            <div :class="{
+                                    'bg-blue-50/50 dark:bg-blue-900/10 border-blue-200 dark:border-blue-800/50 ml-8 border-dashed': entry.is_ppn,
+                                    'bg-amber-50/50 dark:bg-amber-900/10 border-amber-200 dark:border-amber-800/50 ml-8 border-dashed': entry.is_pph,
+                                    'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:shadow shadow-sm transition-shadow': !entry.is_ppn && !entry.is_pph
+                                }"
                                 class="border p-5 rounded-xl flex flex-col xl:flex-row gap-4 relative group">
+                                
+                                <input type="hidden" x-bind:name="'entries['+index+'][is_debit]'" :value="entry.is_pph ? 'false' : 'true'">
+
                                 <div class="w-full xl:w-1/3">
                                     <label
                                         class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Kode
-                                        Akun <span x-show="entry.is_ppn"
-                                            class="text-blue-500 font-bold ml-1">(Pajak)</span></label>
+                                        Akun 
+                                        <span x-show="entry.is_ppn" class="text-blue-500 font-bold ml-1">(Pajak PPN)</span>
+                                        <span x-show="entry.is_pph" class="text-amber-600 font-bold ml-1">(Potongan PPh 23)</span>
+                                    </label>
                                     <div class="relative" x-data="{ open: false, search: '' }" @click.away="open = false">
-                                        <button type="button" @click="if(!entry.is_ppn) { open = !open; if(open) $nextTick(() => $refs.searchInput.focus()) }"
-                                            :class="entry.is_ppn ? 'bg-slate-100 dark:bg-slate-800 cursor-not-allowed opacity-80' : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 hover:border-slate-400 dark:hover:border-slate-500 transition-all'"
+                                        <button type="button" @click="if(!entry.is_ppn && !entry.is_pph) { open = !open; if(open) $nextTick(() => $refs.searchInput.focus()) }"
+                                            :class="(entry.is_ppn || entry.is_pph) ? 'bg-slate-100 dark:bg-slate-800 cursor-not-allowed opacity-80' : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 hover:border-slate-400 dark:hover:border-slate-500 transition-all'"
                                             class="flex items-center justify-between w-full border rounded-xl shadow-sm px-4 py-2.5 text-left transition-all focus:ring-4 focus:ring-slate-900/5">
                                             <span x-text="getAccountName(entry.account_id) || '-- Pilih Akun --'" 
                                                   :class="!entry.account_id ? 'text-slate-400 font-normal outline-none' : 'text-slate-700 dark:text-white font-semibold'"></span>
@@ -237,10 +262,10 @@
                                         class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Catatan
                                         Item (Opsional)</label>
                                     <input x-model="entry.description" x-bind:name="'entries['+index+'][description]'"
-                                        x-bind:readonly="entry.is_ppn"
-                                        :class="entry.is_ppn ? 'bg-slate-100 dark:bg-slate-800 cursor-not-allowed opacity-80' : 'bg-white dark:bg-slate-900'"
+                                        x-bind:readonly="entry.is_ppn || entry.is_pph"
+                                        :class="(entry.is_ppn || entry.is_pph) ? 'bg-slate-100 dark:bg-slate-800 cursor-not-allowed opacity-80' : 'bg-white dark:bg-slate-900'"
                                         class="block w-full border-slate-300 dark:border-slate-600 focus:border-primary-500 focus:ring-primary-500 rounded-lg shadow-sm text-sm py-2.5"
-                                        type="text" :placeholder="entry.is_ppn ? '' : 'Detail keperluan...'" />
+                                        type="text" :placeholder="(entry.is_ppn || entry.is_pph) ? '' : 'Detail keperluan...'" />
                                 </div>
                                 <div class="w-full xl:w-1/4">
                                     <label
@@ -252,13 +277,13 @@
                                             <span class="text-slate-500 sm:text-sm font-medium">Rp</span>
                                         </div>
                                         <input x-model.number="entry.amount" @input="onAmountChange(entry)"
-                                            x-bind:name="'entries['+index+'][amount]'" x-bind:readonly="entry.is_ppn"
-                                            :class="entry.is_ppn ? 'bg-slate-100 dark:bg-slate-800 cursor-not-allowed text-blue-600 dark:text-blue-400 opacity-80' : 'bg-white dark:bg-slate-900 text-slate-800 dark:text-white font-bold'"
+                                            x-bind:name="'entries['+index+'][amount]'" x-bind:readonly="entry.is_ppn || entry.is_pph"
+                                            :class="entry.is_ppn ? 'bg-slate-100 dark:bg-slate-800 cursor-not-allowed text-blue-600 dark:text-blue-400 opacity-80 font-bold' : (entry.is_pph ? 'bg-slate-100 dark:bg-slate-800 cursor-not-allowed text-amber-600 dark:text-amber-400 opacity-80 font-bold' : 'bg-white dark:bg-slate-900 text-slate-800 dark:text-white font-bold')"
                                             class="block w-full pl-9 border-slate-300 dark:border-slate-600 focus:border-primary-500 focus:ring-primary-500 rounded-lg shadow-sm text-sm py-2.5"
                                             type="number" min="0" step="1" required />
                                     </div>
                                 </div>
-                                <button type="button" @click="removeEntry(index)" x-show="!entry.is_ppn"
+                                <button type="button" @click="removeEntry(index)" x-show="!entry.is_ppn && !entry.is_pph"
                                     class="absolute -top-3 -right-3 bg-white text-red-600 border border-red-100 hover:bg-red-600 hover:text-white dark:bg-slate-700 dark:border-slate-600 dark:text-red-400 dark:hover:bg-red-500 dark:hover:text-white rounded-full p-1.5 shadow-sm transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100"
                                     title="Hapus transaksi">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -303,20 +328,27 @@
                         description: '',
                         amount: 0,
                         is_ppn: false,
+                        is_pph: false,
                         parent_id: null
                     }
                 ],
                 accounts: @json($accounts),
                 pics: @json($pics),
-                activeTab: '{{ $openBundle->type }}',
+                isPpnActive: '{{ $openBundle->type }}' === 'vendor',
+                isPphActive: false,
                 ppnAccountId: 18,
+                pphAccountId: 19,
                 totalAmount: 0,
-                selectedPic: '{{ old('pic_name') }}',
+                selectedPicId: '{{ old('pic_id') }}',
+                selectedPicName: '',
 
                 getAccountName(id) {
                     if (!id) return '';
                     const acc = this.accounts.find(a => a.id == id);
-                    return acc ? `${acc.code} - ${acc.name}` : (id == 18 ? '1-115 - PPN Masukan' : 'Akun Tidak Dikenal');
+                    if (acc) return `${acc.code} - ${acc.name}`;
+                    if (id == this.ppnAccountId) return '1-115 - PPN Masukan';
+                    if (id == this.pphAccountId) return '2-100 - Hutang PPh 23';
+                    return 'Akun Tidak Dikenal';
                 },
 
                 filteredAccounts(search) {
@@ -335,47 +367,77 @@
                 },
 
                 init() {
-                    if (this.activeTab === 'vendor') {
-                        // For the initial entry, we need to add its PPN row
-                        const firstEntry = this.entries[0];
-                        this.entries.push({
-                            id: firstEntry.id + 1,
-                            account_id: this.ppnAccountId,
-                            description: 'PPN (11%)',
-                            amount: 0,
-                            is_ppn: true,
-                            parent_id: firstEntry.id
-                        });
+                    if (this.selectedPicId) {
+                        const pic = this.pics.find(p => p.id == this.selectedPicId);
+                        if (pic) this.selectedPicName = pic.name;
+                    }
+                    if (this.isPpnActive) {
+                        this.addPpnToEntry(this.entries[0]);
+                    }
+                    if (this.isPphActive) {
+                        this.addPphToEntry(this.entries[0]);
                     }
                     this.calculateTotal();
                 },
 
-                setTab(tab) {
-                    const oldTab = this.activeTab;
-                    this.activeTab = tab;
-
-                    if (oldTab === 'operasional' && tab === 'vendor') {
-                        // Switching to vendor: add PPN rows for all existing expense entries
-                        const newEntries = [];
+                togglePpn(active) {
+                    this.isPpnActive = active;
+                    if (active) {
                         this.entries.forEach(entry => {
-                            newEntries.push(entry);
-                            if (!entry.is_ppn) {
-                                newEntries.push({
-                                    id: Date.now() + Math.random(),
-                                    account_id: this.ppnAccountId,
-                                    description: 'PPN (11%)',
-                                    amount: Math.round(entry.amount * 0.11),
-                                    is_ppn: true,
-                                    parent_id: entry.id
-                                });
+                            if (!entry.is_ppn && !entry.is_pph) {
+                                this.addPpnToEntry(entry);
                             }
                         });
-                        this.entries = newEntries;
-                    } else if (oldTab === 'vendor' && tab === 'operasional') {
-                        // Switching to operasional: remove all PPN rows
+                    } else {
                         this.entries = this.entries.filter(entry => !entry.is_ppn);
                     }
                     this.calculateTotal();
+                },
+
+                togglePph(active) {
+                    this.isPphActive = active;
+                    if (active) {
+                        this.entries.forEach(entry => {
+                            if (!entry.is_ppn && !entry.is_pph) {
+                                this.addPphToEntry(entry);
+                            }
+                        });
+                    } else {
+                        this.entries = this.entries.filter(entry => !entry.is_pph);
+                    }
+                    this.calculateTotal();
+                },
+
+                addPpnToEntry(mainEntry) {
+                    // Check if already exists
+                    if (this.entries.find(e => e.parent_id === mainEntry.id && e.is_ppn)) return;
+                    
+                    const index = this.entries.findIndex(e => e.id === mainEntry.id);
+                    this.entries.splice(index + 1, 0, {
+                        id: 'ppn-' + mainEntry.id,
+                        account_id: this.ppnAccountId,
+                        description: 'PPN (11%)',
+                        amount: Math.round(mainEntry.amount * 0.11),
+                        is_ppn: true,
+                        is_pph: false,
+                        parent_id: mainEntry.id
+                    });
+                },
+
+                addPphToEntry(mainEntry) {
+                    // Check if already exists
+                    if (this.entries.find(e => e.parent_id === mainEntry.id && e.is_pph)) return;
+                    
+                    const index = this.entries.findLastIndex(e => e.id === mainEntry.id || e.parent_id === mainEntry.id);
+                    this.entries.splice(index + 1, 0, {
+                        id: 'pph-' + mainEntry.id,
+                        account_id: this.pphAccountId,
+                        description: 'PPh 23 (2%)',
+                        amount: Math.round(mainEntry.amount * 0.02),
+                        is_ppn: false,
+                        is_pph: true,
+                        parent_id: mainEntry.id
+                    });
                 },
 
                 addEntry() {
@@ -386,30 +448,27 @@
                         description: '',
                         amount: 0,
                         is_ppn: false,
+                        is_pph: false,
                         parent_id: null
                     };
 
                     this.entries.push(newMainEntry);
 
-                    if (this.activeTab === 'vendor') {
-                        this.entries.push({
-                            id: mainId + 1,
-                            account_id: this.ppnAccountId,
-                            description: 'PPN (11%)',
-                            amount: 0,
-                            is_ppn: true,
-                            parent_id: mainId
-                        });
+                    if (this.isPpnActive) {
+                        this.addPpnToEntry(newMainEntry);
+                    }
+                    if (this.isPphActive) {
+                        this.addPphToEntry(newMainEntry);
                     }
                 },
 
                 removeEntry(index) {
                     const entryToRemove = this.entries[index];
-                    if (!entryToRemove.is_ppn) {
-                        // If it's a parent, remove it and its PPN child
+                    if (!entryToRemove.is_ppn && !entryToRemove.is_pph) {
+                        // If it's a parent, remove it and its children (PPN/PPh)
                         this.entries = this.entries.filter(e => e.id !== entryToRemove.id && e.parent_id !== entryToRemove.id);
                     } else {
-                        // If it's a PPN row (shouldn't really happen with current UI), just remove it
+                        // If it's a child row, just remove it
                         this.entries.splice(index, 1);
                     }
 
@@ -421,11 +480,20 @@
                 },
 
                 onAmountChange(entry) {
-                    if (!entry.is_ppn && this.activeTab === 'vendor') {
-                        // Find associated PPN and update it
-                        const ppnRow = this.entries.find(e => e.parent_id === entry.id);
-                        if (ppnRow) {
-                            ppnRow.amount = Math.round(entry.amount * 0.11);
+                    if (!entry.is_ppn && !entry.is_pph) {
+                        // Update PPN if active
+                        if (this.isPpnActive) {
+                            const ppnRow = this.entries.find(e => e.parent_id === entry.id && e.is_ppn);
+                            if (ppnRow) {
+                                ppnRow.amount = Math.round(entry.amount * 0.11);
+                            }
+                        }
+                        // Update PPh if active
+                        if (this.isPphActive) {
+                            const pphRow = this.entries.find(e => e.parent_id === entry.id && e.is_pph);
+                            if (pphRow) {
+                                pphRow.amount = Math.round(entry.amount * 0.02);
+                            }
                         }
                     }
                     this.calculateTotal();
@@ -433,7 +501,8 @@
 
                 calculateTotal() {
                     this.totalAmount = this.entries.reduce((sum, entry) => {
-                        return sum + (parseFloat(entry.amount) || 0);
+                        const amount = parseFloat(entry.amount) || 0;
+                        return entry.is_pph ? sum - amount : sum + amount;
                     }, 0);
                 },
 
